@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abbadh | DevX-Dragon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/typewriter-effect@latest/dist/core.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Space+Mono&display=swap');
+        
+        :root { scroll-behavior: smooth; }
+        body { 
+            background-color: #020617; 
+            color: #f8fafc; 
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .mono { font-family: 'Space Mono', monospace; }
+
+        /* CRT Scanline Effect */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Cyberpunk Card */
+        .glow-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glow-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            transition: 0.5s;
+        }
+
+        .glow-card:hover::before {
+            left: 100%;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 7vw, 4.5rem);
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(59, 130, 246, 0.2); }
+            50% { border-color: rgba(59, 130, 246, 0.6); }
+            100% { border-color: rgba(59, 130, 246, 0.2); }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px #3b82f6;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body class="selection:bg-blue-500/30">
+
+    <div class="crt-overlay"></div>
+    <canvas id="canvas-bg"></canvas>
+
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center bg-slate-950/40 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <span class="status-dot"></span>
+            <span class="font-bold tracking-tighter text-sm mono">SYS.LOG // <span class="text-blue-500">ABBADH_LK</span></span>
+        </div>
+        <div class="flex space-x-6 text-[10px] uppercase tracking-widest font-medium opacity-70">
+            <a href="#about" class="hover:text-blue-400 transition-colors">BIOS</a>
+            <a href="#projects" class="hover:text-blue-400 transition-colors">FORGE</a>
+            <a href="https://github.com/DevX-Dragon" target="_blank" class="text-blue-400 border border-blue-400/30 px-2 py-1 rounded hover:bg-blue-400 hover:text-white transition-all">GITHUB</a>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col items-center justify-center px-6 text-center relative">
+        <div class="absolute top-1/4 right-10 hidden lg:block border-l border-blue-500/20 pl-4 text-left mono text-[10px] text-slate-500">
+            <p>LATENCY: 24ms</p>
+            <p>LOC: 6.92° N, 79.86° E</p>
+            <p>OS: ARCH_LINUX</p>
+            <p>Uptime: 14_YEARS</p>
+        </div>
+
+        <div class="mb-6 inline-block px-3 py-1 rounded-sm border border-blue-500/30 bg-blue-500/10 text-blue-400 text-[10px] mono tracking-[0.3em]">
+            KERNEL_VERSION: 2.0.26_STABLE
+        </div>
+        
+        <h1 class="hero-title font-bold mb-8 tracking-tighter">
+            <span id="typewriter" class="text-slate-100"></span>
+        </h1>
+
+        <p class="max-w-2xl text-slate-400 text-base md:text-xl font-light leading-relaxed mb-10 px-4">
+            A 14-year-old developer from <span class="text-white">Sri Lanka</span> crafting high-performance 
+            <span class="text-blue-400 mono">[Syntax]</span> and custom <span class="text-blue-400 mono">[Silicon]</span>.
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-sm">
+            <a href="#projects" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-lg font-bold transition-all text-sm mono active:scale-95 text-center">
+                INIT_PROJECT_DUMP
+            </a>
+            <a href="#about" class="bg-white/5 hover:bg-white/10 border border-white/10 px-8 py-4 rounded-lg font-bold transition-all text-sm mono text-center">
+                READ_MANIFESTO
+            </a>
+        </div>
+    </section>
+
+    <section id="about" class="py-24 max-w-5xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="glow-card p-8 rounded-xl md:col-span-3">
+                <h2 class="text-xl font-bold mb-4 text-blue-500 mono">>> USER_DESCRIPTION</h2>
+                <p class="text-slate-300 text-base leading-relaxed mb-4">
+                    I specialize in bridging the gap between hardware and software. From designing complex 4-layer PCBs in KiCad to writing lightning-fast automation tools in Go, my goal is peak efficiency.
+                </p>
+                <div class="flex flex-wrap gap-3 mt-6">
+                    <span class="text-[10px] mono border border-white/10 px-2 py-1 bg-white/5">GOLANG</span>
+                    <span class="text-[10px] mono border border-white/10 px-2 py-1 bg-white/5">EMBEDDED_C</span>
+                    <span class="text-[10px] mono border border-white/10 px-2 py-1 bg-white/5">KICAD_PCB</span>
+                    <span class="text-[10px] mono border border-white/10 px-2 py-1 bg-white/5">THREE_JS</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="glow-card p-6 rounded-xl flex flex-col items-center justify-center text-center">
+                    <span class="text-3xl font-bold text-blue-500">14</span>
+                    <span class="text-[10px] text-slate-500 uppercase mono">Age_Counter</span>
+                </div>
+                <div class="glow-card p-6 rounded-xl flex flex-col items-center justify-center text-center">
+                    <span class="text-3xl font-bold text-white">LK</span>
+                    <span class="text-[10px] text-slate-500 uppercase mono">Region_ID</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-24 px-6 max-w-6xl mx-auto">
+        <h2 class="text-2xl font-bold mb-12 mono tracking-widest"><span class="text-blue-500">0x01.</span> ACTIVE_MODULES</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="glow-card rounded-xl group cursor-pointer">
+                <div class="h-40 bg-slate-900/80 flex items-center justify-center relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                         <div class="grid grid-cols-6 w-full h-full border border-blue-500/10"></div>
+                    </div>
+                    <div class="z-10 text-blue-500 mono text-xs p-4 border border-blue-500/20 bg-black/40">
+                        REPO: DARGO_CLI
+                    </div>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-xl font-bold group-hover:text-blue-400 transition-colors uppercase italic">Dargo-CLI</h3>
+                    <p class="text-slate-400 text-sm mt-3 mb-6 leading-relaxed">
+                        Optimized automation tool written in Go. Revolutionizing how I handle Git workflows with millisecond latency.
+                    </p>
+                    <div class="flex gap-4 items-center">
+                        <span class="text-[10px] text-blue-400 mono">GO_RUNTIME</span>
+                        <div class="h-px flex-grow bg-blue-500/20"></div>
+                        <span class="text-[10px] text-slate-500 mono">v1.4.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glow-card rounded-xl group cursor-pointer">
+                <div class="h-40 bg-slate-900/80 flex items-center justify-center relative overflow-hidden">
+                    <div class="z-10 text-blue-500 mono text-xs p-4 border border-blue-500/20 bg-black/40">
+                        HARDWARE: SMART_V1
+                    </div>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-xl font-bold group-hover:text-blue-400 transition-colors uppercase italic">Smart Controller</h3>
+                    <p class="text-slate-400 text-sm mt-3 mb-6 leading-relaxed">
+                        Custom ESP32-based motherboard. Designed with integrated power management and low-noise analog traces.
+                    </p>
+                    <div class="flex gap-4 items-center">
+                        <span class="text-[10px] text-blue-400 mono">KICAD_PCB</span>
+                        <div class="h-px flex-grow bg-blue-500/20"></div>
+                        <span class="text-[10px] text-slate-500 mono">LAYER_4</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="py-12 text-center border-t border-white/5 bg-slate-950/20">
+        <p class="text-slate-600 mono text-[10px] tracking-[0.5em] uppercase">
+            [ Transmission End ] &copy; 2026 DevX-Dragon
+        </p>
+    </footer>
+
+    <script>
+        // 1. Terminal Typewriter Effect
+        const typewriter = new Typewriter('#typewriter', {
+            loop: true,
+            delay: 45,
+            cursor: '<span style="color: #3b82f6;">_</span>'
+        });
+
+        typewriter
+            .typeString('> DEPLOYING <span class="text-blue-500">ABBADH</span>')
+            .pauseFor(2000)
+            .deleteAll()
+            .typeString('> EXECUTING <span class="text-blue-500">GO_PROJECTS</span>')
+            .pauseFor(1500)
+            .deleteAll()
+            .typeString('> MAPPING <span class="text-blue-500">CIRCUITS</span>')
+            .pauseFor(1500)
+            .deleteAll()
+            .typeString('> DEVX_DRAGON')
+            .pauseFor(3000)
+            .start();
+
+        // 2. Three.js Digital Grid Background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('canvas-bg'), 
+            alpha: true,
+            antialias: true 
+        });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Grid Design
+        const size = 2000;
+        const divisions = 50;
+        const gridHelper = new THREE.GridHelper(size, divisions, 0x1e293b, 0x0f172a);
+        gridHelper.position.y = -150;
+        gridHelper.rotation.x = 0;
+        scene.add(gridHelper);
+
+        // Floating "Data" Particles
+        const geometry = new THREE.BufferGeometry();
+        const vertices = [];
+        for (let i = 0; i < 2000; i++) {
+            vertices.push(
+                Math.random() * 2000 - 1000,
+                Math.random() * 2000 - 1000,
+                Math.random() * 2000 - 1000
+            );
+        }
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        const material = new THREE.PointsMaterial({ size: 2, color: 0x3b82f6, transparent: true, opacity: 0.4 });
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+
+        camera.position.z = 400;
+        camera.position.y = 100;
+
+        // Mouse Interaction
+        let mouseX = 0;
+        let mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) / 100;
+            mouseY = (e.clientY - window.innerHeight / 2) / 100;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Movement logic
+            gridHelper.position.z += 1.5; 
+            if (gridHelper.position.z > (size/divisions)) gridHelper.position.z = 0;
+            
+            points.rotation.y += 0.0005;
+            
+            // Subtle camera tilt based on mouse
+            camera.position.x += (mouseX - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY + 100 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
